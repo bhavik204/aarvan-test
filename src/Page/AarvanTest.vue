@@ -16,7 +16,7 @@
                         >
                             <v-layout pt-1>
                             <v-flex xs3>
-                                <strong @click="displayData(record.text,record.filterValue)">{{record.text}}</strong>
+                                <strong class="hover" @click="displayData(record.text,record.filterValue)">{{record.text}}</strong>
                             </v-flex>
                             </v-layout>
                         </v-timeline-item>
@@ -25,6 +25,7 @@
                 </v-card>
             </div>
             <div>
+                
                 <v-card v-if="table1 == true" width="500">
                     <v-card-title>{{title}}</v-card-title>
                     <v-data-table
@@ -47,6 +48,9 @@
                             
                         </template>
                     </v-data-table>
+                    <div id="chart">
+                        <vue-apex-charts type=line height=350 :options="chartOptions" :series="series" />
+                    </div>
                 </v-card>
                 <v-card v-if="tableExport == true" width="500">
                     <v-card-title>{{titleExport}}</v-card-title>
@@ -153,7 +157,7 @@
                                     <v-layout wrap>
                                     
                                     <v-flex xs12 sm6>
-                                        <h4>Maximum number of records:</h4>
+                                        <h4>Maximum number of records per page:</h4>
                                         <v-select
                                         :items="filterOptions"
                                         label="No. of records"
@@ -161,14 +165,10 @@
                                         required
                                         ></v-select>
                                     </v-flex>
-                                    <v-flex xs12 sm6>
+                                    <!-- <v-flex xs12 sm6>
                                         <h4>Number of pages:</h4>
-                                        <v-select
-                                        :items="['0-17', '18-29', '30-54', '54+']"
-                                        label="No. of pages"
-                                        required
-                                        ></v-select>
-                                    </v-flex>
+                                        
+                                    </v-flex> -->
                                     
                                     </v-layout>
                                 </v-container>
@@ -190,8 +190,11 @@
 
 <script>
 	import axios from 'axios'
-	
+	import VueApexCharts from 'vue-apexcharts'
 	export default{
+        components:{
+            VueApexCharts
+        },
         created(){
 
             axios.get('https://api.data.gov.in/resource/221f84e3-cf5e-4429-88d7-22fbfa3cd66c?api-key=579b464db66ec23bdd0000017a87261338e848ac5b84f86145930c98&format=json&offset=0&limit=100').then(
@@ -204,6 +207,7 @@
                     console.log('jsonn',this.headers)
                     console.log('hello',this.obj)
                     this.title= res.data.title;
+                    this.count= res.data.count
                 }
             ).catch(
                 err => {
@@ -220,6 +224,7 @@
                     console.log('jsonn',this.headersExport)
                    console.log('export',this.objExport)
                     this.titleExport= res.data.title;
+                    this.countExport= res.data.count
                    
                 }
             ).catch(
@@ -237,6 +242,7 @@
                     console.log('jsonn',this.headersAutomobile)
                    console.log('automobile',this.objAutomobile)
                     this.titleAutomobile= res.data.title;
+                    this.countAutomobile= res.data.count
                    
                 }
             ).catch(
@@ -254,6 +260,7 @@
                     console.log('jsonn',this.headersElectricity)
                    console.log('Electricity',this.objElectricity)
                     this.titleElecricity= res.data.title;
+                    this.countElectricity= res.data.count
                    
                 }
             ).catch(
@@ -271,6 +278,7 @@
                     console.log('pollheader',this.headersPopulation)
                    console.log('Population',this.objPopulation)
                     this.titlePopulation= res.data.title;
+                    this.countPopulation= res.data.count
                    
                 }
             ).catch(
@@ -283,10 +291,91 @@
 
 		data () {
             return {
-                // recordObject:{
-                //     filterValue:10,
-                //     recordName:''
+                // BAR CHART
+                // chartOptions: {
+                //     plotOptions: {
+                //     bar: {
+                //         horizontal: true
+                //     }
+                //     },
+                //     xaxis: {
+                //     categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999]
+                //     }
                 // },
+                // series: [{
+                //     name: 'series-1',
+                //     data: [30, 40, 45, 50, 49, 60, 70, 91]
+                // }],
+
+                // MULTILINE
+                series: [{
+                    name: "Extra Budgetry Resource(%)",
+                    data: [ 18.5, 20, 24.6, 23.8, 35, 26.7]
+                },
+                {
+                    name: "Gross Budgetry Support(%)",
+                    data: [ 29.9, 27.8, 44.7, 47.9, 45.3, 41.8]
+                },
+                {
+                    name: 'Internal Generation(%)',
+                    data: [51.6, 52.1, 30.7, 28.3, 19.4, 31.5]
+                }
+                ],
+                chartOptions: {
+                chart: {
+                    zoom: {
+                    enabled: false
+                    },
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    width: [5, 7, 5],
+                    curve: 'straight',
+                    dashArray: [0, 8, 5]
+                },
+
+                title: {
+                    text: 'Page Statistics',
+                    align: 'left'
+                },
+                markers: {
+                    size: 0,
+                    style: 'hollow', // full, hollow, inverted,
+                    hover: {
+                    sizeOffset: 6
+                    }
+                },
+                xaxis: {
+                    categories: ['2007-08', '2008-09', '2009-10', '2010-11', '2011-12', '2012-13'],
+                },
+                tooltip: {
+                    y: [{
+                    title: {
+                        formatter: function (val) {
+                        return val + " (mins)"
+                        }
+                    }
+                    }, {
+                    title: {
+                        formatter: function (val) {
+                        return val + " per session"
+                        }
+                    }
+                    }, {
+                    title: {
+                        formatter: function (val) {
+                        return val;
+                        }
+                    }
+                    }]
+                },
+                grid: {
+                    borderColor: '#f1f1f1',
+                }
+                },
+
                 recordList: [],
                 filterOptions:['2','5','10','15','20'],
                 rowLength: 0,
@@ -305,7 +394,7 @@
                 obj:[],
                 headers:[],
                 title:'',
-
+                count:0,
                 // EXPORT
                 tablePagesExport:{
                     descending: false,
@@ -317,6 +406,7 @@
                 objExport:[],
                 headersExport:[],
                 titleExport:'',
+                countExport:0,
 
                 // AUTOMOBILE
                 tablePagesAutomobile:{
@@ -329,6 +419,7 @@
                 objAutomobile:[], 
                 headersAutomobile:[],
                 titleAutomobile:'',
+                countAutomobile:0,
 
                 // ELECTRICITY
                 tablePagesElectricity:{
@@ -341,6 +432,7 @@
                 objElectricity:[],
                 headersElectricity:[],
                 titleElecricity:'',
+                countElectricity:0,
 
                 // POPULATION
                 tablePagesPopulation:{
@@ -353,6 +445,7 @@
                 objPopulation:[],   
                 headersPopulation:[],
                 titlePopulation:'',
+                countPopulation:0,
 
             }
         },
@@ -428,6 +521,9 @@
 </script>
 
 <style>
+    .hover{
+        cursor: pointer;
+    }
 	.pros-card{
 		padding: 4px;
 
